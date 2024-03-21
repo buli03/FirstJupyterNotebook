@@ -1,4 +1,3 @@
-
 # First Jupyter Notebook
 
 ## Database I'm using
@@ -51,22 +50,18 @@ print(df)
 
 
 ```python
-years = df.year.unique()
-years.sort()
-
-# prepare !dict_of_sales keys by inputing !years values
+# fill !dict_of_sales keys by inputing !years values
 
 dict_of_sales = {}
-for i in years:
-    if i not in dict_of_sales.keys():
-        dict_of_sales[i] = 0
+for i in df.index:
+    if df.year[i] not in dict_of_sales.keys():
+        dict_of_sales[df.year[i]] = 1
+    else:
+        dict_of_sales[df.year[i]] += 1
 
-# get number of sales for each year with !dict_of_sales
+dict(sorted(dict_of_sales.items()))
 
-for ind in df.index:
-    if df["year"][ind] in dict_of_sales:
-        dict_of_sales[df["year"][ind]] += 1
-#print(dict_of_sales)
+# show number of sales for each year with !dict_of_sales
 
 dict_years_keys = list(dict_of_sales.keys())
 dict__years_vals = list(dict_of_sales.values())
@@ -94,28 +89,22 @@ ax.set_title("Sales of cars over all years")
 
 
 ```python
-provinces = df.province.unique()
-provinces.sort()
-
 # prepare !dict_of_provinces keys by inputing !years values
 
 dict_of_provinces = {}
-for i in provinces:
-    if i not in dict_of_provinces.keys():
-        dict_of_provinces[i] = 0
-
-# get number of sales for each province with !dict_of_provinces
-
-for ind in df.index:
-    if df["province"][ind] in dict_of_provinces:
-        dict_of_provinces[df["province"][ind]] += 1
+for i in df.index:
+    if df.province[i] not in dict_of_provinces.keys():
+        dict_of_provinces[df.province[i]] = 1
+    else:
+        dict_of_provinces[df.province[i]] += 1
 
 # combining to table other with value less than 3.5% of all
 all = len(df.index)
+
 dict_of_provinces["Other"] = 0
 list_of_toDelete = []
 for i in dict_of_provinces.keys():
-    if float(dict_of_provinces[i]) / all < 0.035:
+    if float(dict_of_provinces[i]) / all < 0.035 and i != "Other":
         dict_of_provinces["Other"] += dict_of_provinces[i]
         list_of_toDelete.append(i)
 
@@ -141,5 +130,65 @@ bx.set_title("Percentage of sales in provinces")
 
     
 ![png](output_6_1.png)
+    
+
+
+## Percentage of fuel types
+
+
+```python
+#count fuel types of cars in DF
+dict_fuel = {}
+explode_fuel = []
+
+for i in df.index:
+    if df.fuel[i] not in dict_fuel.keys():
+        dict_fuel[df.fuel[i]] = 1
+    else:
+        dict_fuel[df.fuel[i]] += 1
+
+# combining to table other with value less than 3.5% of all
+
+dict_fuel["Other"] = 0
+list_of_toDelete = []
+inr = 0.0
+for i in dict_fuel.keys():
+    if float(dict_fuel[i]) / all < 0.01 and i != "Other":
+        dict_fuel["Other"] += dict_fuel[i]
+        list_of_toDelete.append(i)
+    elif float(dict_fuel[i]) / all >= 0.05 and i != "Other":
+        explode_fuel.append(0)
+    else:
+        inr += 0.1
+        explode_fuel.append(inr)
+
+#delete from dictionary keys no longer in interest
+for i in list_of_toDelete:
+    del dict_fuel[i]
+
+#show the percentages in table
+dict_fuel_keys = list(dict_fuel.keys())
+dict_fuel_vals = list(dict_fuel.values())
+figPie, bx = plt.subplots(figsize=(7,7))
+bx.pie(dict_fuel_vals, labels=dict_fuel_keys, autopct='%1.1f%%',shadow=False, startangle=110, explode = explode_fuel)
+bx.axis('equal') 
+bx.set_title("Percentage fuel types")
+```
+
+    {'Diesel': 48476, 'CNG': 47, 'Gasoline': 61597, 'LPG': 4301, 'Hybrid': 2621, 'Electric': 885}
+    {'Diesel': 48476, 'Gasoline': 61597, 'LPG': 4301, 'Hybrid': 2621, 'Other': 932}
+    [0, 0, 0.1, 0.2, 0.30000000000000004]
+    
+
+
+
+
+    Text(0.5, 1.0, 'Percentage fuel types')
+
+
+
+
+    
+![png](output_8_2.png)
     
 
